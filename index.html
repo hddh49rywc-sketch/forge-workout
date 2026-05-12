@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FORGE PPL — Workout Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Space Mono', monospace; background: #080c0a; color: #c8d4c0; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: #00c8ff66; border-radius: 2px; }
+    #app { display: flex; flex-direction: column; min-height: 100vh; }
+    .header { background: #0a0f0a; border-bottom: 1px solid #162016; padding: 14px 18px; position: sticky; top: 0; z-index: 10; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .logo { font-family: 'Bebas Neue'; font-size: 26px; letter-spacing: 4px; color: #fff; line-height: 1; }
+    .logo span { color: var(--day-color); }
+    .date-label { font-size: 10px; color: #3a5a3a; letter-spacing: 2px; margin-top: 2px; }
+    .view-btns { display: flex; gap: 4px; }
+    .view-btn { background: none; border: none; font-family: 'Bebas Neue'; font-size: 13px; letter-spacing: 2px; padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 2px; color: #3a5a3a; }
+    .view-btn.active { background: color-mix(in srgb, var(--day-color) 15%, transparent); color: var(--day-color); }
+    .day-tabs { display: flex; overflow-x: auto; gap: 0; }
+    .day-tab { background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: 'Bebas Neue'; font-size: 15px; letter-spacing: 2px; padding: 8px 14px; color: #3a4a3a; transition: all 0.15s; white-space: nowrap; }
+    .day-tab.active { color: var(--day-color); border-bottom-color: var(--day-color); }
+    .day-header { padding: 16px 18px 0; display: flex; align-items: flex-end; justify-content: space-between; }
+    .day-title { font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 3px; line-height: 1; color: var(--day-color); }
+    .day-focus { font-size: 11px; color: #4a6a4a; letter-spacing: 1px; margin-top: 3px; }
+    .progress-pct { font-family: 'Bebas Neue'; font-size: 28px; letter-spacing: 1px; text-align: right; }
+    .progress-pct.complete { color: var(--day-color); }
+    .progress-pct:not(.complete) { color: #fff; }
+    .progress-count { font-size: 10px; color: #3a5a3a; letter-spacing: 1px; text-align: right; }
+    .progress-track { margin: 10px 18px 0; height: 3px; background: #162016; border-radius: 2px; }
+    .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; background: var(--day-color); }
+    .cards { padding: 16px 18px 80px; display: flex; flex-direction: column; gap: 12px; }
+    .ex-card { background: #0c110c; border: 1px solid #162016; border-radius: 4px; padding: 16px; transition: border 0.2s, background 0.2s; }
+    .ex-card.done { border-color: color-mix(in srgb, var(--day-color) 25%, transparent); background: color-mix(in srgb, var(--day-color) 4%, #0c110c); }
+    .ex-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .ex-left { flex: 1; }
+    .ex-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ex-name { font-family: 'Bebas Neue'; font-size: 17px; letter-spacing: 1.5px; color: #c8d4c0; }
+    .ex-name.done { color: var(--day-color); }
+    .tag-bb { font-size: 9px; letter-spacing: 1.5px; border: 1px solid #ffba1a55; color: #ffba1a; padding: 1px 6px; border-radius: 2px; }
+    .tag-db { font-size: 9px; letter-spacing: 1.5px; border: 1px solid #aa88ff55; color: #aa88ff; padding: 1px 6px; border-radius: 2px; }
+    .tag-done { font-size: 9px; letter-spacing: 2px; border: 1px solid color-mix(in srgb, var(--day-color) 40%, transparent); color: var(--day-color); padding: 1px 6px; border-radius: 2px; }
+    .ex-muscles { font-size: 10px; color: #3a5a3a; margin-top: 2px; letter-spacing: 0.5px; }
+    .ex-sets-label { font-family: 'Bebas Neue'; font-size: 20px; color: #c8d4c0; letter-spacing: 1px; text-align: right; }
+    .ex-sets-label span { font-size: 12px; color: #4a6a4a; }
+    .ex-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+    .ctrl-label { font-size: 9px; color: #3a5a3a; letter-spacing: 2px; margin-bottom: 4px; text-transform: uppercase; }
+    .weight-input { background: #0d140d; border: 1px solid #1a2a1a; color: var(--day-color); font-family: 'Bebas Neue'; font-size: 18px; padding: 4px 8px; border-radius: 3px; width: 90px; outline: none; text-align: center; transition: border 0.15s; }
+    .weight-input:focus { border-color: color-mix(in srgb, var(--day-color) 60%, transparent); }
+    .weight-input::placeholder { color: #2a3a2a; }
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .set-dots { display: flex; gap: 6px; }
+    .set-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #2a3a2a; background: none; cursor: pointer; transition: all 0.15s; font-size: 11px; font-family: 'Space Mono'; font-weight: 700; color: #2a3a2a; display: flex; align-items: center; justify-content: center; }
+    .set-dot.done { background: var(--day-color); border-color: var(--day-color); color: #080c0a; }
+    .note-input { background: #0d140d; border: 1px solid #1a2a1a; color: #8aaa8a; font-family: 'Space Mono'; font-size: 11px; padding: 8px 10px; border-radius: 3px; width: 100%; outline: none; resize: none; transition: border 0.15s; line-height: 1.5; }
+    .note-input:focus { border-color: color-mix(in srgb, var(--day-color) 35%, transparent); }
+    .log-title { font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 3px; color: #4a6a4a; margin-bottom: 14px; }
+    .log-day { margin-bottom: 16px; background: #0c110c; border: 1px solid #162016; border-radius: 4px; overflow: hidden; }
+    .log-day-header { padding: 10px 14px; background: #0f150f; border-bottom: 1px solid #162016; display: flex; justify-content: space-between; align-items: center; }
+    .log-day-name { font-family: 'Bebas Neue'; font-size: 16px; letter-spacing: 2px; }
+    .log-no-data { font-size: 10px; color: #2a3a2a; letter-spacing: 1px; }
+    .log-row { padding: 10px 14px; border-bottom: 1px solid #111a11; display: flex; gap: 12px; align-items: flex-start; }
+    .log-ex-name { font-family: 'Bebas Neue'; font-size: 14px; color: #c8d4c0; letter-spacing: 1px; }
+    .log-ex-notes { font-size: 11px; color: #4a6a4a; margin-top: 3px; line-height: 1.5; }
+    .log-weight { font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 1px; flex-shrink: 0; }
+    .log-weight span { font-size: 11px; color: #3a5a3a; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const WORKOUT_PLAN = [
+  { day:1, type:"PULL", focus:"Back & Biceps — Barbell", color:"#00c8ff", exercises:[
+    { name:"Barbell Deadlift", sets:2, reps:"5-8", muscles:"Hamstrings · Glutes · Entire Back", tag:"BB" },
+    { name:"Barbell Bent-Over Row", sets:2, reps:"5-8", muscles:"Lats · Rhomboids · Biceps", tag:"BB" },
+    { name:"DB Single-Arm Row", sets:2, reps:"5-8 ea", muscles:"Lats · Mid Back · Rear Delt", tag:"DB" },
+    { name:"DB Hammer Curl", sets:2, reps:"5-8", muscles:"Brachialis · Brachioradialis", tag:"DB" },
+    { name:"Barbell Curl", sets:2, reps:"5-8", muscles:"Biceps Long Head · Short Head", tag:"BB" },
+    { name:"DB Reverse Fly", sets:2, reps:"5-8", muscles:"Rear Delts · Rhomboids", tag:"DB" }
+  ]},
+  { day:2, type:"PUSH", focus:"Chest, Shoulders & Triceps — Barbell", color:"#ff4d1c", exercises:[
+    { name:"Barbell Bench Press", sets:2, reps:"5-8", muscles:"Pecs · Anterior Delt · Triceps", tag:"BB" },
+    { name:"Barbell Overhead Press", sets:2, reps:"5-8", muscles:"Anterior Delt · Upper Pecs · Triceps", tag:"BB" },
+    { name:"DB Incline Press", sets:2, reps:"5-8", muscles:"Upper Pecs · Front Delt", tag:"DB" },
+    { name:"DB Lateral Raise", sets:2, reps:"5-8", muscles:"Medial Delt · Traps", tag:"DB" },
+    { name:"DB Skull Crusher", sets:2, reps:"5-8", muscles:"Long Head Tricep", tag:"DB" },
+    { name:"Close-Grip Barbell Press", sets:2, reps:"5-8", muscles:"All 3 Tricep Heads · Inner Pecs", tag:"BB" }
+  ]},
+  { day:3, type:"LEGS", focus:"Quads, Hamstrings & Glutes — Barbell", color:"#39d98a", exercises:[
+    { name:"Barbell Back Squat", sets:2, reps:"5-8", muscles:"Quads · Glutes · Core · Erectors", tag:"BB" },
+    { name:"Barbell Romanian Deadlift", sets:2, reps:"5-8", muscles:"Hamstrings · Glutes · Lower Back", tag:"BB" },
+    { name:"DB Bulgarian Split Squat", sets:2, reps:"5-8 ea", muscles:"Quads · Glutes · Hip Flexors", tag:"DB" },
+    { name:"DB Walking Lunges", sets:2, reps:"5-8 ea", muscles:"Quads · Glutes · Balance", tag:"DB" },
+    { name:"Barbell Hip Thrust", sets:2, reps:"5-8", muscles:"Glutes · Hamstrings · Core", tag:"BB" },
+    { name:"DB Goblet Squat", sets:2, reps:"5-8", muscles:"Quads · Core · Adductors", tag:"DB" }
+  ]},
+  { day:4, type:"PULL", focus:"Back & Biceps — Calisthenics", color:"#00c8ff", exercises:[
+    { name:"Pull-Ups", sets:2, reps:"FAILURE", muscles:"Lats · Biceps · Core", tag:"BW" },
+    { name:"Chin-Ups", sets:2, reps:"FAILURE", muscles:"Biceps · Lower Lats · Brachialis", tag:"BW" },
+    { name:"Inverted Row", sets:2, reps:"FAILURE", muscles:"Mid Back · Rhomboids · Rear Delt", tag:"BW" },
+    { name:"Archer Pull-Up", sets:2, reps:"FAILURE ea", muscles:"Unilateral Lats · Biceps", tag:"BW" },
+    { name:"Scapular Pull-Up", sets:2, reps:"FAILURE", muscles:"Serratus · Lower Traps · Scapular Control", tag:"BW" },
+    { name:"Flex Hang", sets:2, reps:"MAX HOLD", muscles:"Lats · Biceps · Grip Strength", tag:"BW" }
+  ]},
+  { day:5, type:"PUSH", focus:"Chest, Shoulders & Triceps — Calisthenics", color:"#ff4d1c", exercises:[
+    { name:"Dips", sets:2, reps:"FAILURE", muscles:"Pecs · Triceps · Anterior Delt", tag:"BW" },
+    { name:"Push-Ups", sets:2, reps:"FAILURE", muscles:"Pecs · Triceps · Core", tag:"BW" },
+    { name:"Pike Push-Up", sets:2, reps:"FAILURE", muscles:"Anterior Delt · Triceps · Upper Pecs", tag:"BW" },
+    { name:"Diamond Push-Up", sets:2, reps:"FAILURE", muscles:"Triceps · Inner Pecs", tag:"BW" },
+    { name:"Archer Push-Up", sets:2, reps:"FAILURE ea", muscles:"Unilateral Pecs · Triceps", tag:"BW" },
+    { name:"Decline Push-Up", sets:2, reps:"FAILURE", muscles:"Upper Pecs · Front Delt", tag:"BW" }
+  ]},
+  { day:6, type:"LEGS", focus:"Lower Body — Calisthenics", color:"#39d98a", exercises:[
+    { name:"Pistol Squat", sets:2, reps:"FAILURE ea", muscles:"Quads · Glutes · Balance · Core", tag:"BW" },
+    { name:"Jump Squat", sets:2, reps:"FAILURE", muscles:"Quads · Glutes · Explosive Power", tag:"BW" },
+    { name:"Single-Leg Hip Thrust", sets:2, reps:"FAILURE ea", muscles:"Glutes · Hamstrings · Core", tag:"BW" },
+    { name:"Nordic Curl", sets:2, reps:"FAILURE", muscles:"Hamstrings · Glutes · Knee Stability", tag:"BW" },
+    { name:"Bulgarian Split Squat", sets:2, reps:"FAILURE ea", muscles:"Quads · Glutes · Hip Flexors", tag:"BW" },
+    { name:"Shrimp Squat", sets:2, reps:"FAILURE ea", muscles:"Quads · Hip Flexors · Balance", tag:"BW" }
+  ]}
+];
+
+const STORAGE_KEY="forge_ppl_notes";
+let state={ activeDay:0, view:"workout", notes:{}, completedSets:{} };
+function loadNotes(){ try{ const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{}; }catch{ return{}; } }
+function saveNotes(){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state.notes)); }catch{} }
+state.notes=loadNotes();
+function getNoteKey(d,e){ return `d${d}_e${e}`; }
+function isSetDone(d,e,s){ return !!state.completedSets[`${d}_${e}_${s}`]; }
+function isExDone(d,i,sets){ return Array.from({length:sets},(_,s)=>isSetDone(d,i,s)).every(Boolean); }
+function getProgress(di){ const d=WORKOUT_PLAN[di]; const done=d.exercises.filter((ex,i)=>isExDone(di,i,ex.sets)).length; return{done,total:d.exercises.length,pct:Math.round((done/d.exercises.length)*100)}; }
+function setDayColor(c){ document.documentElement.style.setProperty('--day-color',c); }
+
+function render(){
+  const day=WORKOUT_PLAN[state.activeDay];
+  setDayColor(day.color);
+  const prog=getProgress(state.activeDay);
+  const today=new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  document.getElementById('app').innerHTML=`
+    <div class="header">
+      <div class="header-top">
+        <div><div class="logo">FORGE <span>PPL</span></div><div class="date-label">${today}</div></div>
+        <div class="view-btns">
+          <button class="view-btn ${state.view==='workout'?'active':''}" onclick="switchView('workout')">WORKOUT</button>
+          <button class="view-btn ${state.view==='log'?'active':''}" onclick="switchView('log')">LOG</button>
+        </div>
+      </div>
+      <div class="day-tabs">
+        ${WORKOUT_PLAN.map((d,i)=>`<button class="day-tab ${state.activeDay===i?'active':''}" style="${state.activeDay===i?`color:${d.color};border-bottom-color:${d.color}`:''}" onclick="switchDay(${i})">D${d.day} ${d.type}</button>`).join('')}
+      </div>
+    </div>
+    <div class="day-header">
+      <div><div class="day-title">DAY ${day.day} — ${day.type}</div><div class="day-focus">${day.focus}</div></div>
+      <div><div class="progress-pct ${prog.pct===100?'complete':''}">${prog.pct}%</div><div class="progress-count">${prog.done}/${prog.total} DONE</div></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${prog.pct}%;${prog.pct>0?`box-shadow:0 0 8px ${day.color}88`:''}"></div></div>
+    <div class="cards">${state.view==='workout'?renderWorkout():renderLog()}</div>
+  `;
+}
+
+function renderWorkout(){
+  const day=WORKOUT_PLAN[state.activeDay];
+  return day.exercises.map((ex,ei)=>{
+    const done=isExDone(state.activeDay,ei,ex.sets);
+    const note=state.notes[getNoteKey(state.activeDay,ei)]||{};
+    const tagHtml=ex.tag==="BB"?`<span class="tag-bb">BARBELL</span>`:ex.tag==="DB"?`<span class="tag-db">DUMBBELL</span>`:'';
+    const dots=Array.from({length:ex.sets},(_,s)=>`<button class="set-dot ${isSetDone(state.activeDay,ei,s)?'done':''}" onclick="toggleSet(${ei},${s})">${s+1}</button>`).join('');
+    return `<div class="ex-card ${done?'done':''}">
+      <div class="ex-top">
+        <div class="ex-left">
+          <div class="ex-name-row"><span class="ex-name ${done?'done':''}">${ex.name}</span>${tagHtml}${done?`<span class="tag-done">DONE</span>`:''}</div>
+          <div class="ex-muscles">${ex.muscles}</div>
+        </div>
+        <div class="ex-sets-label">${ex.sets}<span>x</span>${ex.reps}</div>
+      </div>
+      <div class="ex-controls">
+        <div><div class="ctrl-label">WEIGHT (LBS)</div><input type="number" class="weight-input" placeholder="000" value="${note.weight||''}" oninput="updateNote(${ei},'weight',this.value)"/></div>
+        <div><div class="ctrl-label">SETS COMPLETE</div><div class="set-dots">${dots}</div></div>
+      </div>
+      <textarea class="note-input" rows="2" placeholder="Notes — form cues, feel, next session target..." oninput="updateNote(${ei},'notes',this.value)">${note.notes||''}</textarea>
+    </div>`;
+  }).join('');
+}
+
+function renderLog(){
+  return `<div class="log-title">SESSION LOG — ALL DAYS</div>`+WORKOUT_PLAN.map((d,di)=>{
+    const hasData=d.exercises.some((_,ei)=>{ const k=getNoteKey(di,ei); return state.notes[k]?.weight||state.notes[k]?.notes; });
+    const rows=d.exercises.map((ex,ei)=>{ const k=getNoteKey(di,ei); const n=state.notes[k]||{}; if(!n.weight&&!n.notes)return''; return`<div class="log-row"><div style="flex:1"><div class="log-ex-name">${ex.name}</div>${n.notes?`<div class="log-ex-notes">${n.notes}</div>`:''}</div>${n.weight?`<div class="log-weight" style="color:${d.color}">${n.weight}<span>lbs</span></div>`:''}</div>`; }).join('');
+    return`<div class="log-day"><div class="log-day-header"><div class="log-day-name" style="color:${d.color}">DAY ${d.day} — ${d.type}</div>${!hasData?'<div class="log-no-data">NO DATA YET</div>':''}</div>${rows}</div>`;
+  }).join('');
+}
+
+function switchDay(i){ state.activeDay=i; render(); }
+function switchView(v){ state.view=v; render(); }
+function toggleSet(ei,si){ const k=`${state.activeDay}_${ei}_${si}`; state.completedSets[k]=!state.completedSets[k]; render(); }
+function updateNote(ei,field,value){ const k=getNoteKey(state.activeDay,ei); if(!state.notes[k])state.notes[k]={}; state.notes[k][field]=value; saveNotes(); const prog=getProgress(state.activeDay); const day=WORKOUT_PLAN[state.activeDay]; const p=document.querySelector('.progress-pct'); const c=document.querySelector('.progress-count'); const f=document.querySelector('.progress-fill'); if(p){p.textContent=prog.pct+'%';p.className='progress-pct'+(prog.pct===100?' complete':'');} if(c)c.textContent=`${prog.done}/${prog.total} DONE`; if(f){f.style.width=prog.pct+'%';f.style.boxShadow=prog.pct>0?`0 0 8px ${day.color}88`:'none';} }
+
+render();
+</script>
+</body>
+</html>
