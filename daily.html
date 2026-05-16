@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FORGE Daily</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07080a;--surface:#0e1014;--border:#1c1e24;--text:#d4d8e0;--muted:#3a3f4a;--water:#00b4d8;--gold:#f4c430;--green:#39d98a;--red:#ff4d1c}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+h1.logo{font-family:'Bebas Neue';font-size:28px;letter-spacing:5px;color:#fff}
+h1.logo span{color:var(--water)}
+.date{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:2px}
+header{padding:18px 20px 14px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:flex-start}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono';font-size:10px;letter-spacing:1px;padding:5px 10px;border-radius:3px;cursor:pointer}
+.section{padding:20px 20px 0}
+.section-title{font-family:'Bebas Neue';font-size:13px;letter-spacing:3px;color:var(--muted);margin-bottom:12px}
+.water-display{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:20px}
+.water-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.water-amount{font-family:'Bebas Neue';font-size:52px;color:var(--water);line-height:1;letter-spacing:2px}
+.water-amount span{font-size:20px;color:var(--muted)}
+.water-goal{font-size:10px;color:var(--muted);letter-spacing:1px;text-align:right}
+.water-goal strong{display:block;font-family:'Bebas Neue';font-size:18px;color:var(--text);letter-spacing:1px}
+.water-track{height:6px;background:var(--border);border-radius:3px;margin-bottom:16px;overflow:hidden}
+.water-fill{height:100%;background:linear-gradient(90deg,#0077b6,var(--water));border-radius:3px;transition:width 0.4s ease}
+.water-btns{display:flex;gap:8px;flex-wrap:wrap}
+.water-btn{flex:1;min-width:60px;background:var(--bg);border:1px solid var(--border);color:var(--water);font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;padding:10px 8px;border-radius:4px;cursor:pointer;text-align:center}
+.water-btn.minus{color:var(--muted)}
+.hygiene-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.hygiene-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.hygiene-item.done{border-color:color-mix(in srgb,var(--green) 35%,transparent);background:color-mix(in srgb,var(--green) 5%,var(--surface))}
+.hygiene-item.done .h-name{color:var(--green)}
+.hygiene-left{display:flex;align-items:center;gap:12px}
+.h-icon{font-size:22px;width:32px;text-align:center}
+.h-name{font-family:'Bebas Neue';font-size:16px;letter-spacing:1.5px;color:var(--text)}
+.h-sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.5px}
+.h-check{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted)}
+.hygiene-item.done .h-check{background:var(--green);border-color:var(--green);color:#07080a}
+.streak-row{display:flex;gap:10px;margin-bottom:20px}
+.streak-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px;text-align:center}
+.streak-num{font-family:'Bebas Neue';font-size:36px;letter-spacing:2px;line-height:1}
+.streak-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.summary{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:20px}
+.summary-title{font-family:'Bebas Neue';font-size:13px;letter-spacing:3px;color:var(--muted);margin-bottom:10px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px}
+.summary-row:last-child{border-bottom:none}
+.summary-key{color:var(--muted)}
+.summary-val{color:var(--text);font-weight:500}
+.summary-val.good{color:var(--green)}
+.summary-val.warn{color:var(--gold)}
+.summary-val.bad{color:var(--red)}
+.done-banner{background:color-mix(in srgb,var(--green) 12%,transparent);border:1px solid color-mix(in srgb,var(--green) 30%,transparent);border-radius:6px;padding:14px 16px;text-align:center;margin-bottom:20px;display:none}
+.done-banner.show{display:block}
+.done-banner-text{font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--green)}
+.done-banner-sub{font-size:11px;color:color-mix(in srgb,var(--green) 60%,transparent);margin-top:4px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1 class="logo">FORGE <span>DAILY</span></h1><div class="date" id="dateLabel"></div></div>
+  <button class="reset-btn" onclick="resetDay()">RESET DAY</button>
+</header>
+<div class="section">
+  <div class="section-title">HYDRATION</div>
+  <div class="water-display">
+    <div class="water-top">
+      <div class="water-amount" id="waterAmt">0<span>oz</span></div>
+      <div class="water-goal">GOAL<strong id="waterGoalLabel">128oz</strong></div>
+    </div>
+    <div class="water-track"><div class="water-fill" id="waterFill" style="width:0%"></div></div>
+    <div class="water-btns">
+      <button class="water-btn minus" onclick="addWater(-8)">-8oz</button>
+      <button class="water-btn" onclick="addWater(8)">+8oz</button>
+      <button class="water-btn" onclick="addWater(16)">+16oz</button>
+      <button class="water-btn" onclick="addWater(32)">+32oz</button>
+    </div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">HYGIENE CHECKLIST</div>
+  <div class="hygiene-grid" id="hygieneGrid"></div>
+</div>
+<div class="section">
+  <div class="done-banner" id="doneBanner">
+    <div class="done-banner-text">ALL DONE TODAY 🔥</div>
+    <div class="done-banner-sub">Hygiene complete · Water goal hit · Stay consistent</div>
+  </div>
+  <div class="summary" id="summaryBox">
+    <div class="summary-title">TODAY'S SUMMARY</div>
+    <div id="summaryRows"></div>
+  </div>
+  <div class="streak-row">
+    <div class="streak-card"><div class="streak-num" id="streakNum" style="color:var(--gold)">0</div><div class="streak-label">Day Streak</div></div>
+    <div class="streak-card"><div class="streak-num" id="completedToday" style="color:var(--green)">0</div><div class="streak-label">Completed</div></div>
+    <div class="streak-card"><div class="streak-num" id="totalItems" style="color:var(--water)">0</div><div class="streak-label">Total Tasks</div></div>
+  </div>
+</div>
+<script>
+const HYGIENE_ITEMS=[
+  {id:"shower",icon:"🚿",name:"SHOWER",sub:"Daily · Full body wash"},
+  {id:"teeth_am",icon:"🦷",name:"BRUSH TEETH AM",sub:"Morning · 2 minutes"},
+  {id:"teeth_pm",icon:"🦷",name:"BRUSH TEETH PM",sub:"Night · 2 minutes"},
+  {id:"floss",icon:"🧵",name:"FLOSS",sub:"Daily · Between all teeth"},
+  {id:"deodorant",icon:"🧴",name:"DEODORANT",sub:"After shower · Fresh application"},
+  {id:"skincare",icon:"✨",name:"SKINCARE",sub:"Moisturize · SPF if going out"},
+  {id:"nails",icon:"✂️",name:"NAILS",sub:"Weekly · Trim and clean"},
+  {id:"hair",icon:"💈",name:"HAIR",sub:"Wash · Style"},
+  {id:"laundry",icon:"👕",name:"CLEAN CLOTHES",sub:"Fresh outfit daily"},
+  {id:"sheets",icon:"🛏️",name:"BEDSHEETS",sub:"Weekly · Change and wash"}
+];
+const WATER_GOAL=128;
+const SK="forge_daily";
+function todayKey(){return new Date().toISOString().split("T")[0]}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(SK);
+    const saved=raw?JSON.parse(raw):{};
+    const today=todayKey();
+    if(saved.date!==today){
+      const streak=saved.streak||0;
+      const yesterday=new Date();
+      yesterday.setDate(yesterday.getDate()-1);
+      const yd=yesterday.toISOString().split("T")[0];
+      const newStreak=(saved.date===yd&&saved.allDone)?streak+1:(saved.allDone?1:0);
+      return{date:today,water:0,hygiene:{},streak:newStreak,allDone:false};
+    }
+    return saved;
+  }catch{return{date:todayKey(),water:0,hygiene:{},streak:0,allDone:false}}
+}
+function saveState(){try{localStorage.setItem(SK,JSON.stringify(state))}catch{}}
+let state=loadState();
+function addWater(oz){state.water=Math.max(0,state.water+oz);saveState();renderWater();renderSummary();checkAllDone()}
+function toggleHygiene(id){state.hygiene[id]=!state.hygiene[id];saveState();renderHygiene();renderSummary();checkAllDone()}
+function checkAllDone(){
+  const ha=HYGIENE_ITEMS.every(i=>state.hygiene[i.id]);
+  const wd=state.water>=WATER_GOAL;
+  state.allDone=ha&&wd;saveState();
+  const b=document.getElementById("doneBanner");
+  if(state.allDone)b.classList.add("show");else b.classList.remove("show");
+}
+function renderWater(){
+  const pct=Math.min(100,Math.round((state.water/WATER_GOAL)*100));
+  document.getElementById("waterAmt").innerHTML=state.water+'<span>oz</span>';
+  document.getElementById("waterFill").style.width=pct+"%";
+}
+function renderHygiene(){
+  document.getElementById("hygieneGrid").innerHTML=HYGIENE_ITEMS.map(item=>{
+    const done=!!state.hygiene[item.id];
+    return`<div class="hygiene-item ${done?"done":""}" onclick="toggleHygiene('${item.id}')">
+      <div class="hygiene-left"><div class="h-icon">${item.icon}</div>
+      <div><div class="h-name">${item.name}</div><div class="h-sub">${item.sub}</div></div></div>
+      <div class="h-check">${done?"✓":""}</div></div>`;
+  }).join("");
+}
+function renderSummary(){
+  const done=HYGIENE_ITEMS.filter(i=>state.hygiene[i.id]).length;
+  const total=HYGIENE_ITEMS.length;
+  const wp=Math.min(100,Math.round((state.water/WATER_GOAL)*100));
+  const wc=wp>=100?"good":wp>=50?"warn":"bad";
+  const hc=done===total?"good":done>=total/2?"warn":"bad";
+  document.getElementById("summaryRows").innerHTML=`
+    <div class="summary-row"><span class="summary-key">Water Intake</span><span class="summary-val ${wc}">${state.water}oz / ${WATER_GOAL}oz (${wp}%)</span></div>
+    <div class="summary-row"><span class="summary-key">Hygiene Tasks</span><span class="summary-val ${hc}">${done} / ${total} complete</span></div>
+    <div class="summary-row"><span class="summary-key">Streak</span><span class="summary-val" style="color:var(--gold)">${state.streak} days 🔥</span></div>
+    <div class="summary-row"><span class="summary-key">Date</span><span class="summary-val">${todayKey()}</span></div>`;
+  document.getElementById("streakNum").textContent=state.streak;
+  document.getElementById("completedToday").textContent=done;
+  document.getElementById("totalItems").textContent=total;
+}
+function resetDay(){if(!confirm("Reset today?"))return;state.water=0;state.hygiene={};state.allDone=false;saveState();renderAll()}
+function renderAll(){
+  document.getElementById("dateLabel").textContent=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}).toUpperCase();
+  renderWater();renderHygiene();renderSummary();checkAllDone();
+}
+renderAll();
+</script>
+</body>
+</html>
