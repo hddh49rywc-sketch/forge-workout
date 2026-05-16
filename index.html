@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -20,7 +21,7 @@
     .view-btn { background: none; border: none; font-family: 'Bebas Neue'; font-size: 13px; letter-spacing: 2px; padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 2px; color: #3a5a3a; }
     .view-btn.active { background: color-mix(in srgb, var(--day-color) 15%, transparent); color: var(--day-color); }
     .day-tabs { display: flex; overflow-x: auto; gap: 0; }
-    .day-tab { background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: 'Bebas Neue'; font-size: 15px; letter-spacing: 2px; padding: 8px 14px; color: #3a4a3a; transition: all 0.15s; white-space: nowrap; }
+    .day-tab { background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: 'Bebas Neue'; font-size: 15px; letter-spacing: 2px; padding: 8px 28px; color: #3a4a3a; transition: all 0.15s; white-space: nowrap; }
     .day-tab.active { color: var(--day-color); border-bottom-color: var(--day-color); }
     .day-header { padding: 16px 18px 0; display: flex; align-items: flex-end; justify-content: space-between; }
     .day-title { font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 3px; line-height: 1; color: var(--day-color); }
@@ -56,6 +57,15 @@
     .set-dot.done { background: var(--day-color); border-color: var(--day-color); color: #080c0a; }
     .note-input { background: #0d140d; border: 1px solid #1a2a1a; color: #8aaa8a; font-family: 'Space Mono'; font-size: 11px; padding: 8px 10px; border-radius: 3px; width: 100%; outline: none; resize: none; transition: border 0.15s; line-height: 1.5; }
     .note-input:focus { border-color: color-mix(in srgb, var(--day-color) 35%, transparent); }
+    .walk-card { background: #0c110c; border: 1px solid #162016; border-radius: 4px; padding: 18px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border 0.2s, background 0.2s; user-select: none; }
+    .walk-card.done { border-color: #ffd70066; background: rgba(255,215,0,0.05); }
+    .walk-left { display: flex; align-items: center; gap: 14px; }
+    .walk-icon { font-size: 24px; }
+    .walk-title { font-family: 'Bebas Neue'; font-size: 17px; letter-spacing: 1.5px; color: #c8d4c0; }
+    .walk-title.done { color: #ffd700; }
+    .walk-sub { font-size: 10px; color: #3a5a3a; margin-top: 3px; letter-spacing: 1px; }
+    .walk-check { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #2a3a2a; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; transition: all 0.15s; flex-shrink: 0; color: #2a3a2a; }
+    .walk-check.done { background: #ffd700; border-color: #ffd700; color: #080c0a; }
     .log-title { font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 3px; color: #4a6a4a; margin-bottom: 14px; }
     .log-day { margin-bottom: 16px; background: #0c110c; border: 1px solid #162016; border-radius: 4px; overflow: hidden; }
     .log-day-header { padding: 10px 14px; background: #0f150f; border-bottom: 1px solid #162016; display: flex; justify-content: space-between; align-items: center; }
@@ -72,132 +82,92 @@
 <div id="app"></div>
 <script>
 const WORKOUT_PLAN = [
-  { day:1, type:"PULL", focus:"Back & Biceps — Barbell", color:"#00c8ff", exercises:[
-    { name:"Barbell Deadlift", sets:2, reps:"5-8", muscles:"Hamstrings · Glutes · Entire Back", tag:"BB" },
-    { name:"Barbell Bent-Over Row", sets:2, reps:"5-8", muscles:"Lats · Rhomboids · Biceps", tag:"BB" },
-    { name:"DB Single-Arm Row", sets:2, reps:"5-8 ea", muscles:"Lats · Mid Back · Rear Delt", tag:"DB" },
-    { name:"DB Hammer Curl", sets:2, reps:"5-8", muscles:"Brachialis · Brachioradialis", tag:"DB" },
-    { name:"Barbell Curl", sets:2, reps:"5-8", muscles:"Biceps Long Head · Short Head", tag:"BB" },
-    { name:"DB Reverse Fly", sets:2, reps:"5-8", muscles:"Rear Delts · Rhomboids", tag:"DB" }
+  { day:1, type:"PULL", focus:"Back & Biceps", color:"#00c8ff", exercises:[
+    { name:"Deadlift", sets:2, reps:"5-8", muscles:"Hamstrings · Glutes · Entire Back", tag:"BB" },
+    { name:"Bent Over Row", sets:2, reps:"5-8", muscles:"Lats · Rhomboids · Biceps", tag:"BB" },
+    { name:"Lat Pulldown", sets:2, reps:"5-8", muscles:"Lats · Teres Major · Biceps", tag:"" },
+    { name:"Face Pull", sets:2, reps:"5-8", muscles:"Rear Delts · Rotator Cuff · Traps", tag:"" },
+    { name:"Hammer Curl", sets:2, reps:"5-8", muscles:"Brachialis · Brachioradialis", tag:"DB" },
+    { name:"Bayesian Curl", sets:2, reps:"5-8", muscles:"Biceps Long Head · Full Stretch", tag:"" }
   ]},
-  { day:2, type:"PUSH", focus:"Chest, Shoulders & Triceps — Barbell", color:"#ff4d1c", exercises:[
-    { name:"Barbell Bench Press", sets:2, reps:"5-8", muscles:"Pecs · Anterior Delt · Triceps", tag:"BB" },
-    { name:"Barbell Overhead Press", sets:2, reps:"5-8", muscles:"Anterior Delt · Upper Pecs · Triceps", tag:"BB" },
-    { name:"DB Incline Press", sets:2, reps:"5-8", muscles:"Upper Pecs · Front Delt", tag:"DB" },
-    { name:"DB Lateral Raise", sets:2, reps:"5-8", muscles:"Medial Delt · Traps", tag:"DB" },
-    { name:"DB Skull Crusher", sets:2, reps:"5-8", muscles:"Long Head Tricep", tag:"DB" },
-    { name:"Close-Grip Barbell Press", sets:2, reps:"5-8", muscles:"All 3 Tricep Heads · Inner Pecs", tag:"BB" }
+  { day:2, type:"PUSH", focus:"Chest, Shoulders & Triceps", color:"#ff4d1c", exercises:[
+    { name:"Bench Press", sets:2, reps:"5-8", muscles:"Pecs · Anterior Delt · Triceps", tag:"BB" },
+    { name:"Overhead Press", sets:2, reps:"5-8", muscles:"Anterior Delt · Upper Pecs · Triceps", tag:"BB" },
+    { name:"Incline Bench Press", sets:2, reps:"5-8", muscles:"Upper Pecs · Front Delt", tag:"DB" },
+    { name:"Triceps", sets:2, reps:"5-8", muscles:"All 3 Tricep Heads · Lockout", tag:"" },
+    { name:"Lateral Raise", sets:2, reps:"5-8", muscles:"Medial Delt · Shoulder Width", tag:"" }
   ]},
-  { day:3, type:"LEGS", focus:"Quads, Hamstrings & Glutes — Barbell", color:"#39d98a", exercises:[
-    { name:"Barbell Back Squat", sets:2, reps:"5-8", muscles:"Quads · Glutes · Core · Erectors", tag:"BB" },
-    { name:"Barbell Romanian Deadlift", sets:2, reps:"5-8", muscles:"Hamstrings · Glutes · Lower Back", tag:"BB" },
-    { name:"DB Bulgarian Split Squat", sets:2, reps:"5-8 ea", muscles:"Quads · Glutes · Hip Flexors", tag:"DB" },
-    { name:"DB Walking Lunges", sets:2, reps:"5-8 ea", muscles:"Quads · Glutes · Balance", tag:"DB" },
-    { name:"Barbell Hip Thrust", sets:2, reps:"5-8", muscles:"Glutes · Hamstrings · Core", tag:"BB" },
-    { name:"DB Goblet Squat", sets:2, reps:"5-8", muscles:"Quads · Core · Adductors", tag:"DB" }
-  ]},
-  { day:4, type:"PULL", focus:"Back & Biceps — Calisthenics", color:"#00c8ff", exercises:[
-    { name:"Pull-Ups", sets:2, reps:"FAILURE", muscles:"Lats · Biceps · Core", tag:"BW" },
-    { name:"Chin-Ups", sets:2, reps:"FAILURE", muscles:"Biceps · Lower Lats · Brachialis", tag:"BW" },
-    { name:"Inverted Row", sets:2, reps:"FAILURE", muscles:"Mid Back · Rhomboids · Rear Delt", tag:"BW" },
-    { name:"Archer Pull-Up", sets:2, reps:"FAILURE ea", muscles:"Unilateral Lats · Biceps", tag:"BW" },
-    { name:"Scapular Pull-Up", sets:2, reps:"FAILURE", muscles:"Serratus · Lower Traps · Scapular Control", tag:"BW" },
-    { name:"Flex Hang", sets:2, reps:"MAX HOLD", muscles:"Lats · Biceps · Grip Strength", tag:"BW" }
-  ]},
-  { day:5, type:"PUSH", focus:"Chest, Shoulders & Triceps — Calisthenics", color:"#ff4d1c", exercises:[
-    { name:"Dips", sets:2, reps:"FAILURE", muscles:"Pecs · Triceps · Anterior Delt", tag:"BW" },
-    { name:"Push-Ups", sets:2, reps:"FAILURE", muscles:"Pecs · Triceps · Core", tag:"BW" },
-    { name:"Pike Push-Up", sets:2, reps:"FAILURE", muscles:"Anterior Delt · Triceps · Upper Pecs", tag:"BW" },
-    { name:"Diamond Push-Up", sets:2, reps:"FAILURE", muscles:"Triceps · Inner Pecs", tag:"BW" },
-    { name:"Archer Push-Up", sets:2, reps:"FAILURE ea", muscles:"Unilateral Pecs · Triceps", tag:"BW" },
-    { name:"Decline Push-Up", sets:2, reps:"FAILURE", muscles:"Upper Pecs · Front Delt", tag:"BW" }
-  ]},
-  { day:6, type:"LEGS", focus:"Lower Body — Calisthenics", color:"#39d98a", exercises:[
-    { name:"Pistol Squat", sets:2, reps:"FAILURE ea", muscles:"Quads · Glutes · Balance · Core", tag:"BW" },
-    { name:"Jump Squat", sets:2, reps:"FAILURE", muscles:"Quads · Glutes · Explosive Power", tag:"BW" },
-    { name:"Single-Leg Hip Thrust", sets:2, reps:"FAILURE ea", muscles:"Glutes · Hamstrings · Core", tag:"BW" },
-    { name:"Nordic Curl", sets:2, reps:"FAILURE", muscles:"Hamstrings · Glutes · Knee Stability", tag:"BW" },
-    { name:"Bulgarian Split Squat", sets:2, reps:"FAILURE ea", muscles:"Quads · Glutes · Hip Flexors", tag:"BW" },
-    { name:"Shrimp Squat", sets:2, reps:"FAILURE ea", muscles:"Quads · Hip Flexors · Balance", tag:"BW" }
+  { day:3, type:"LEGS", focus:"Quads, Hamstrings & Glutes", color:"#39d98a", exercises:[
+    { name:"Squat", sets:2, reps:"5-8", muscles:"Quads · Glutes · Core · Erectors", tag:"BB" },
+    { name:"Romanian Deadlift", sets:2, reps:"5-8", muscles:"Hamstrings · Glutes · Lower Back", tag:"BB" },
+    { name:"Leg Press", sets:2, reps:"5-8", muscles:"Quads · Glutes · Adductors", tag:"" },
+    { name:"Leg Curl", sets:2, reps:"5-8", muscles:"Hamstring Isolation · Knee Flexion", tag:"" },
+    { name:"Calf Raise", sets:2, reps:"5-8", muscles:"Gastrocnemius · Soleus", tag:"" }
   ]}
 ];
 
-const STORAGE_KEY="forge_ppl_notes";
-let state={ activeDay:0, view:"workout", notes:{}, completedSets:{} };
+const STORAGE_KEY=“forge_ppl_notes”;
+let state={ activeDay:0, view:“workout”, notes:{}, completedSets:{}, walks:{} };
 function loadNotes(){ try{ const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{}; }catch{ return{}; } }
+function loadWalks(){ try{ const r=localStorage.getItem(STORAGE_KEY+”_walks”); return r?JSON.parse(r):{}; }catch{ return{}; } }
 function saveNotes(){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state.notes)); }catch{} }
+function saveWalks(){ try{ localStorage.setItem(STORAGE_KEY+”*walks”,JSON.stringify(state.walks)); }catch{} }
 state.notes=loadNotes();
+state.walks=loadWalks();
 function getNoteKey(d,e){ return `d${d}_e${e}`; }
 function isSetDone(d,e,s){ return !!state.completedSets[`${d}_${e}_${s}`]; }
-function isExDone(d,i,sets){ return Array.from({length:sets},(_,s)=>isSetDone(d,i,s)).every(Boolean); }
-function getProgress(di){ const d=WORKOUT_PLAN[di]; const done=d.exercises.filter((ex,i)=>isExDone(di,i,ex.sets)).length; return{done,total:d.exercises.length,pct:Math.round((done/d.exercises.length)*100)}; }
-function setDayColor(c){ document.documentElement.style.setProperty('--day-color',c); }
+function isExDone(d,i,sets){ return Array.from({length:sets},(*,s)=>isSetDone(d,i,s)).every(Boolean); }
+function getProgress(di){
+const d=WORKOUT_PLAN[di];
+const exDone=d.exercises.filter((ex,i)=>isExDone(di,i,ex.sets)).length;
+const walkDone=!!state.walks[di]?1:0;
+const total=d.exercises.length+1;
+return{done:exDone+walkDone,total,pct:Math.round(((exDone+walkDone)/total)*100)};
+}
+function setDayColor(c){ document.documentElement.style.setProperty(’–day-color’,c); }
 
 function render(){
-  const day=WORKOUT_PLAN[state.activeDay];
-  setDayColor(day.color);
-  const prog=getProgress(state.activeDay);
-  const today=new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
-  document.getElementById('app').innerHTML=`
-    <div class="header">
-      <div class="header-top">
-        <div><div class="logo">FORGE <span>PPL</span></div><div class="date-label">${today}</div></div>
-        <div class="view-btns">
-          <button class="view-btn ${state.view==='workout'?'active':''}" onclick="switchView('workout')">WORKOUT</button>
-          <button class="view-btn ${state.view==='log'?'active':''}" onclick="switchView('log')">LOG</button>
-        </div>
-      </div>
-      <div class="day-tabs">
-        ${WORKOUT_PLAN.map((d,i)=>`<button class="day-tab ${state.activeDay===i?'active':''}" style="${state.activeDay===i?`color:${d.color};border-bottom-color:${d.color}`:''}" onclick="switchDay(${i})">D${d.day} ${d.type}</button>`).join('')}
-      </div>
-    </div>
-    <div class="day-header">
-      <div><div class="day-title">DAY ${day.day} — ${day.type}</div><div class="day-focus">${day.focus}</div></div>
-      <div><div class="progress-pct ${prog.pct===100?'complete':''}">${prog.pct}%</div><div class="progress-count">${prog.done}/${prog.total} DONE</div></div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" style="width:${prog.pct}%;${prog.pct>0?`box-shadow:0 0 8px ${day.color}88`:''}"></div></div>
-    <div class="cards">${state.view==='workout'?renderWorkout():renderLog()}</div>
-  `;
+const day=WORKOUT_PLAN[state.activeDay];
+setDayColor(day.color);
+const prog=getProgress(state.activeDay);
+const today=new Date().toLocaleDateString(“en-US”,{weekday:“short”,month:“short”,day:“numeric”});
+document.getElementById(‘app’).innerHTML=` <div class="header"> <div class="header-top"> <div><div class="logo">FORGE <span>PPL</span></div><div class="date-label">${today}</div></div> <div class="view-btns"> <button class="view-btn ${state.view==='workout'?'active':''}" onclick="switchView('workout')">WORKOUT</button> <button class="view-btn ${state.view==='log'?'active':''}" onclick="switchView('log')">LOG</button> </div> </div> <div class="day-tabs"> ${WORKOUT_PLAN.map((d,i)=>`<button class="day-tab ${state.activeDay===i?'active':''}" style="${state.activeDay===i?`color:${d.color};border-bottom-color:${d.color}`:''}" onclick="switchDay(${i})">D${d.day} ${d.type}</button>`).join('')} </div> </div> <div class="day-header"> <div><div class="day-title">DAY ${day.day} — ${day.type}</div><div class="day-focus">${day.focus}</div></div> <div><div class="progress-pct ${prog.pct===100?'complete':''}">${prog.pct}%</div><div class="progress-count">${prog.done}/${prog.total} DONE</div></div> </div> <div class="progress-track"><div class="progress-fill" style="width:${prog.pct}%;${prog.pct>0?`box-shadow:0 0 8px ${day.color}88`:''}"></div></div> <div class="cards">${state.view==='workout'?renderWorkout():renderLog()}</div> `;
 }
 
 function renderWorkout(){
-  const day=WORKOUT_PLAN[state.activeDay];
-  return day.exercises.map((ex,ei)=>{
-    const done=isExDone(state.activeDay,ei,ex.sets);
-    const note=state.notes[getNoteKey(state.activeDay,ei)]||{};
-    const tagHtml=ex.tag==="BB"?`<span class="tag-bb">BARBELL</span>`:ex.tag==="DB"?`<span class="tag-db">DUMBBELL</span>`:'';
-    const dots=Array.from({length:ex.sets},(_,s)=>`<button class="set-dot ${isSetDone(state.activeDay,ei,s)?'done':''}" onclick="toggleSet(${ei},${s})">${s+1}</button>`).join('');
-    return `<div class="ex-card ${done?'done':''}">
-      <div class="ex-top">
-        <div class="ex-left">
-          <div class="ex-name-row"><span class="ex-name ${done?'done':''}">${ex.name}</span>${tagHtml}${done?`<span class="tag-done">DONE</span>`:''}</div>
-          <div class="ex-muscles">${ex.muscles}</div>
-        </div>
-        <div class="ex-sets-label">${ex.sets}<span>x</span>${ex.reps}</div>
-      </div>
-      <div class="ex-controls">
-        <div><div class="ctrl-label">WEIGHT (LBS)</div><input type="number" class="weight-input" placeholder="000" value="${note.weight||''}" oninput="updateNote(${ei},'weight',this.value)"/></div>
-        <div><div class="ctrl-label">SETS COMPLETE</div><div class="set-dots">${dots}</div></div>
-      </div>
-      <textarea class="note-input" rows="2" placeholder="Notes — form cues, feel, next session target..." oninput="updateNote(${ei},'notes',this.value)">${note.notes||''}</textarea>
-    </div>`;
-  }).join('');
+const day=WORKOUT_PLAN[state.activeDay];
+const walkDone=!!state.walks[state.activeDay];
+const exercises=day.exercises.map((ex,ei)=>{
+const done=isExDone(state.activeDay,ei,ex.sets);
+const note=state.notes[getNoteKey(state.activeDay,ei)]||{};
+const tagHtml=ex.tag===“BB”?`<span class="tag-bb">BARBELL</span>`:ex.tag===“DB”?`<span class="tag-db">DUMBBELL</span>`:’’;
+const dots=Array.from({length:ex.sets},(_,s)=>`<button class="set-dot ${isSetDone(state.activeDay,ei,s)?'done':''}" onclick="toggleSet(${ei},${s})">${s+1}</button>`).join(’’);
+return `<div class="ex-card ${done?'done':''}"> <div class="ex-top"> <div class="ex-left"> <div class="ex-name-row"><span class="ex-name ${done?'done':''}">${ex.name}</span>${tagHtml}${done?`<span class="tag-done">DONE</span>`:''}</div> <div class="ex-muscles">${ex.muscles}</div> </div> <div class="ex-sets-label">${ex.sets}<span>x</span>${ex.reps}</div> </div> <div class="ex-controls"> <div><div class="ctrl-label">WEIGHT (LBS)</div><input type="number" class="weight-input" placeholder="000" value="${note.weight||''}" oninput="updateNote(${ei},'weight',this.value)"/></div> <div><div class="ctrl-label">SETS COMPLETE</div><div class="set-dots">${dots}</div></div> </div> <textarea class="note-input" rows="2" placeholder="Notes — form cues, feel, next session target..." oninput="updateNote(${ei},'notes',this.value)">${note.notes||''}</textarea> </div>`;
+}).join(’’);
+
+const walkCard=` <div class="walk-card ${walkDone?'done':''}" onclick="toggleWalk()"> <div class="walk-left"> <div class="walk-icon">🚶</div> <div> <div class="walk-title ${walkDone?'done':''}">30 MIN INCLINE WALK</div> <div class="walk-sub">15% INCLINE · 3.0 SPEED · FAT BURN</div> </div> </div> <div class="walk-check ${walkDone?'done':''}">${walkDone?'✓':''}</div> </div>`;
+
+return exercises + walkCard;
 }
 
 function renderLog(){
-  return `<div class="log-title">SESSION LOG — ALL DAYS</div>`+WORKOUT_PLAN.map((d,di)=>{
-    const hasData=d.exercises.some((_,ei)=>{ const k=getNoteKey(di,ei); return state.notes[k]?.weight||state.notes[k]?.notes; });
-    const rows=d.exercises.map((ex,ei)=>{ const k=getNoteKey(di,ei); const n=state.notes[k]||{}; if(!n.weight&&!n.notes)return''; return`<div class="log-row"><div style="flex:1"><div class="log-ex-name">${ex.name}</div>${n.notes?`<div class="log-ex-notes">${n.notes}</div>`:''}</div>${n.weight?`<div class="log-weight" style="color:${d.color}">${n.weight}<span>lbs</span></div>`:''}</div>`; }).join('');
-    return`<div class="log-day"><div class="log-day-header"><div class="log-day-name" style="color:${d.color}">DAY ${d.day} — ${d.type}</div>${!hasData?'<div class="log-no-data">NO DATA YET</div>':''}</div>${rows}</div>`;
-  }).join('');
+return `<div class="log-title">SESSION LOG — ALL DAYS</div>`+WORKOUT_PLAN.map((d,di)=>{
+const hasData=d.exercises.some((_,ei)=>{ const k=getNoteKey(di,ei); return state.notes[k]?.weight||state.notes[k]?.notes; });
+const walkDone=!!state.walks[di];
+const rows=d.exercises.map((ex,ei)=>{ const k=getNoteKey(di,ei); const n=state.notes[k]||{}; if(!n.weight&&!n.notes)return’’; return`<div class="log-row"><div style="flex:1"><div class="log-ex-name">${ex.name}</div>${n.notes?`<div class="log-ex-notes">${n.notes}</div>`:''}</div>${n.weight?`<div class="log-weight" style="color:${d.color}">${n.weight}<span>lbs</span></div>`:''}</div>`; }).join(’’);
+const walkRow=walkDone?`<div class="log-row"><div style="flex:1"><div class="log-ex-name" style="color:#ffd700">🚶 30 MIN INCLINE WALK</div><div class="log-ex-notes">Completed</div></div></div>`:’’;
+return`<div class="log-day"><div class="log-day-header"><div class="log-day-name" style="color:${d.color}">DAY ${d.day} — ${d.type}</div>${!hasData&&!walkDone?'<div class="log-no-data">NO DATA YET</div>':''}</div>${rows}${walkRow}</div>`;
+}).join(’’);
 }
 
 function switchDay(i){ state.activeDay=i; render(); }
 function switchView(v){ state.view=v; render(); }
+function toggleWalk(){ state.walks[state.activeDay]=!state.walks[state.activeDay]; saveWalks(); render(); }
 function toggleSet(ei,si){ const k=`${state.activeDay}_${ei}_${si}`; state.completedSets[k]=!state.completedSets[k]; render(); }
-function updateNote(ei,field,value){ const k=getNoteKey(state.activeDay,ei); if(!state.notes[k])state.notes[k]={}; state.notes[k][field]=value; saveNotes(); const prog=getProgress(state.activeDay); const day=WORKOUT_PLAN[state.activeDay]; const p=document.querySelector('.progress-pct'); const c=document.querySelector('.progress-count'); const f=document.querySelector('.progress-fill'); if(p){p.textContent=prog.pct+'%';p.className='progress-pct'+(prog.pct===100?' complete':'');} if(c)c.textContent=`${prog.done}/${prog.total} DONE`; if(f){f.style.width=prog.pct+'%';f.style.boxShadow=prog.pct>0?`0 0 8px ${day.color}88`:'none';} }
+function updateNote(ei,field,value){ const k=getNoteKey(state.activeDay,ei); if(!state.notes[k])state.notes[k]={}; state.notes[k][field]=value; saveNotes(); const prog=getProgress(state.activeDay); const day=WORKOUT_PLAN[state.activeDay]; const p=document.querySelector(’.progress-pct’); const c=document.querySelector(’.progress-count’); const f=document.querySelector(’.progress-fill’); if(p){p.textContent=prog.pct+’%’;p.className=‘progress-pct’+(prog.pct===100?’ complete’:’’);} if(c)c.textContent=`${prog.done}/${prog.total} DONE`; if(f){f.style.width=prog.pct+’%’;f.style.boxShadow=prog.pct>0?`0 0 8px ${day.color}88`:‘none’;} }
 
 render();
 </script>
+
 </body>
 </html>
